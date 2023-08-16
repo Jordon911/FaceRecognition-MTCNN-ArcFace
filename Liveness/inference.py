@@ -43,8 +43,8 @@ while True:
 
     for face in detections[0][0]:
         face_confidence = face[2]
-        if face_confidence > args['conf']:
-            
+        if face_confidence > float(args['conf']):
+
             bbox = face[3:]
             x1 = int(bbox[0] * w)
             y1 = int(bbox[1] * h)

@@ -74,7 +74,7 @@ x = x.astype('float64')
 
 le = LabelEncoder()
 labels = le.fit_transform(y)
-labels = tf.keras.utils.to_categorical(labels, 2)
+labels = tf.keras.utils.to_categorical(labels, class_number)
 
 # Train Deep Neural Network
 x_train, x_test, y_train, y_test = train_test_split(x, labels,

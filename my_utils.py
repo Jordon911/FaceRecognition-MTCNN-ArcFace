@@ -1,7 +1,7 @@
 import numpy as np
 import math
 from PIL import Image
-from deepface.commons import distance
+from deepface.commons import distance as dst
 
 
 # this function aligns given face in img based on left and right eye coordinates
@@ -28,10 +28,10 @@ def alignment_procedure(img, left_eye, right_eye, bbox):
     # -----------------------
     # find length of triangle edges
 
-    a = distance.findEuclideanDistance(np.array(left_eye), np.array(point_3rd))
-    b = distance.findEuclideanDistance(
+    a = dst.findEuclideanDistance(np.array(left_eye), np.array(point_3rd))
+    b = dst.findEuclideanDistance(
         np.array(right_eye), np.array(point_3rd))
-    c = distance.findEuclideanDistance(np.array(right_eye), np.array(left_eye))
+    c = dst.findEuclideanDistance(np.array(right_eye), np.array(left_eye))
 
     # -----------------------
 
