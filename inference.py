@@ -12,7 +12,7 @@ import pickle
 def recognize_attendance():
     source = "0"  # Path to Video or webcam
     path_saved_model = 'models/model.h5'  # Path to saved .h5 model
-    threshold = 0.9  # Min prediction confidence (0<conf<1)
+    threshold = 0.80  # Min prediction confidence (0<conf<1)
 
     # Liveness Model
     liveness_model_path = 'models/liveness.model'
@@ -68,7 +68,7 @@ def recognize_attendance():
                         (0, 0, 255), 2
                     )
                     cv2.putText(
-                        img, 'Fake',
+                        img, '',
                         (xmin, ymin - 10), cv2.FONT_HERSHEY_PLAIN,
                         2, (0, 0, 255), 2
                     )
@@ -93,7 +93,7 @@ def recognize_attendance():
                         pose_class = label_encoder.classes_[class_id]
                         color = (0, 255, 0)
                     else:
-                        pose_class = 'Unkown Person'
+                        pose_class = 'Unknown Person'
                         color = (0, 0, 255)
 
                     # Show Result

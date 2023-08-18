@@ -6,20 +6,40 @@ import inference
 from tkinter import *
 import tkinter as tk
 import threading
+# import cv2
+# from PIL import ImageTk
+# import PIL
 
 
-def cfaces_call():
+def cfaces_call(name, student_id, programme, tutorial_group, year_and_sem):
     tkStatus.set("Capturing Faces...")
     status_label.update()
-    take_imgs.takeImages()
+    take_imgs.takeImages(name, student_id, programme, tutorial_group, year_and_sem)
     tkStatus.set("Faces Captured")
     status_label.update()
 
+def take_imgs1(name_entry, student_id_entry, programme_entry, tutorial_group_entry, year_sem_entry, error_label):
+    name = name_entry.get()
+    student_id = student_id_entry.get()
+    programme = programme_entry.get()
+    tutorial_group = tutorial_group_entry.get()
+    year_and_sem = year_sem_entry.get()
 
-def take_imgs1():
-    t1 = threading.Thread(target=cfaces_call, daemon=True)
+    if not (name and student_id and programme and tutorial_group and year_and_sem):
+        error_label.config(text="Error: All fields are required!")
+        return  # Don't proceed if any field is empty
+
+    error_label.config(text="")  # Clear the error message
+    tkStatus.set("")  # Clear any previous status message
+    status_label.update()
+
+    # Introduce a slight delay to show the "Updating Faces..." message
+    tkStatus.set("Updating Faces...")
+    status_label.update()
+    root.update_idletasks()  # Force the update of the GUI to show the message
+
+    t1 = threading.Thread(target=cfaces_call, args=(name, student_id, programme, tutorial_group, year_and_sem), daemon=True)
     t1.start()
-
 def normalize_img():
     tkStatus.set("Normalizing Faces...")
     status_label.update()
@@ -64,32 +84,50 @@ tkStatus = tk.StringVar()
 
 
 def open_registration_screen():
-    global webcam_label
     root.withdraw()  # Hide the main window
     registration_window = tk.Toplevel(root)
     registration_window.title("Registration")
 
     # Set the dimensions for the registration window
-    main_window_width = root.winfo_width()  # Get the main window's width
-    main_window_height = root.winfo_height()  # Get the main window's height
+    # main_window_width = root.winfo_width()  # Get the main window's width
+    # main_window_height = root.winfo_height()  # Get the main window's height
+    main_window_width = 382
+    main_window_height = 450
     registration_window.geometry(f"{main_window_width}x{main_window_height}")
 
-    # Create a frame to contain webcam preview and buttons
-    content_frame = tk.Frame(registration_window)
-    content_frame.pack(pady=8)
+    # Add entry widgets for user information
+    name_label = tk.Label(registration_window, text="Name:")
+    name_label.pack()
+    name_entry = tk.Entry(registration_window)
+    name_entry.pack()
 
-    # Create a Label for webcam preview
-    webcam_label = tk.Label(
-        content_frame,
-        width=640,  # Set the desired width
-        height=480,  # Set the desired height
-    )
-    webcam_label.pack(pady=8)
+    student_id_label = tk.Label(registration_window, text="Student ID:")
+    student_id_label.pack()
+    student_id_entry = tk.Entry(registration_window)
+    student_id_entry.pack()
+
+    programme_label = tk.Label(registration_window, text="Programme:")
+    programme_label.pack()
+    programme_entry = tk.Entry(registration_window)
+    programme_entry.pack()
+
+    tutorial_group_label = tk.Label(registration_window, text="Tutorial Group:")
+    tutorial_group_label.pack()
+    tutorial_group_entry = tk.Entry(registration_window)
+    tutorial_group_entry.pack()
+
+    year_and_sem_label = tk.Label(registration_window, text="Year and Semester:")
+    year_and_sem_label.pack()
+    year_sem_entry = tk.Entry(registration_window)
+    year_sem_entry.pack()
+
+    error_label = tk.Label(registration_window, text="", fg="red")
+    error_label.pack()
 
     take_image_button = tk.Button(
         registration_window,
         text="TAKE IMAGE",
-        command=take_imgs1,
+        command=lambda: take_imgs1(name_entry, student_id_entry, programme_entry, tutorial_group_entry, year_sem_entry, error_label),
         width=42,  # Adjust the width as needed
         height=2,  # Adjust the height as needed
         bg='#3498db',
@@ -150,10 +188,6 @@ def open_registration_screen():
         activeforeground="White",
     )
     back_button.pack(pady=8)
-
-
-
-
 
 # ---------------main driver ------------------
 # create a tkinter window
