@@ -1,14 +1,16 @@
 import os
 import take_imgs
 import norm_img
-import train
 import inference
 from tkinter import *
+from tkinter import ttk
 import tkinter as tk
 import threading
 # import cv2
 # from PIL import ImageTk
 # import PIL
+import csv
+
 
 
 def cfaces_call(name, student_id, programme, tutorial_group, year_and_sem):
@@ -16,6 +18,15 @@ def cfaces_call(name, student_id, programme, tutorial_group, year_and_sem):
     status_label.update()
     take_imgs.takeImages(name, student_id, programme, tutorial_group, year_and_sem)
     tkStatus.set("Faces Captured")
+    status_label.update()
+
+
+def save_student_details(name, student_id, programme, tutorial_group, year_and_sem):
+    with open('student_database.csv', 'a', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow([name, student_id, programme, tutorial_group, year_and_sem])
+
+    tkStatus.set("Student details saved.")
     status_label.update()
 
 def take_imgs1(name_entry, student_id_entry, programme_entry, tutorial_group_entry, year_sem_entry, error_label):
@@ -38,6 +49,9 @@ def take_imgs1(name_entry, student_id_entry, programme_entry, tutorial_group_ent
     status_label.update()
     root.update_idletasks()  # Force the update of the GUI to show the message
 
+    # Call the function to save student details
+    save_student_details(name, student_id, programme, tutorial_group, year_and_sem)
+
     t1 = threading.Thread(target=cfaces_call, args=(name, student_id, programme, tutorial_group, year_and_sem), daemon=True)
     t1.start()
 def normalize_img():
@@ -51,20 +65,6 @@ def normalize_img():
 def norm_img1():
     t2 = threading.Thread(target=normalize_img, daemon=True)
     t2.start()
-
-
-def timages_call():
-    tkStatus.set("Training Images...")
-    status_label.update()
-    train.TrainImages()
-    tkStatus.set("Images Trained.")
-    status_label.update()
-
-
-def train1():
-    t3 = threading.Thread(target=timages_call, daemon=True)
-    t3.start()
-
 
 def rfaces_call():
     tkStatus.set("Recognizing Faces...")
@@ -108,18 +108,20 @@ def open_registration_screen():
 
     programme_label = tk.Label(registration_window, text="Programme:")
     programme_label.pack()
-    programme_entry = tk.Entry(registration_window)
-    programme_entry.pack()
+    programme_combobox = ttk.Combobox(registration_window, values=["RDS", "REI", "RWS", "RSD"])
+    programme_combobox.pack()
 
+    # Create a Combobox for Tutorial Groups
     tutorial_group_label = tk.Label(registration_window, text="Tutorial Group:")
     tutorial_group_label.pack()
-    tutorial_group_entry = tk.Entry(registration_window)
-    tutorial_group_entry.pack()
+    tutorial_group_combobox = ttk.Combobox(registration_window, values=["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"])
+    tutorial_group_combobox.pack()
 
+    # Create a Combobox for Year and Semester
     year_and_sem_label = tk.Label(registration_window, text="Year and Semester:")
     year_and_sem_label.pack()
-    year_sem_entry = tk.Entry(registration_window)
-    year_sem_entry.pack()
+    year_sem_combobox = ttk.Combobox(registration_window, values=["Year 1 Sem 1", "Year 1 Sem 2", "Year 1 Sem 3", "Year 2 Sem 1", "Year 2 Sem 2", "Year 2 Sem 3", "Year 3 Sem 1", "Year 3 Sem 2", "Year 3 Sem 3"])
+    year_sem_combobox.pack()
 
     error_label = tk.Label(registration_window, text="", fg="red")
     error_label.pack()
@@ -127,7 +129,7 @@ def open_registration_screen():
     take_image_button = tk.Button(
         registration_window,
         text="TAKE IMAGE",
-        command=lambda: take_imgs1(name_entry, student_id_entry, programme_entry, tutorial_group_entry, year_sem_entry, error_label),
+        command=lambda: take_imgs1(name_entry, student_id_entry, programme_combobox, tutorial_group_combobox, year_sem_combobox, error_label),
         width=42,  # Adjust the width as needed
         height=2,  # Adjust the height as needed
         bg='#3498db',
@@ -154,21 +156,6 @@ def open_registration_screen():
     )
     normalize_button.pack(pady=8)
 
-    train_button = tk.Button(
-        registration_window,
-        text="TRAIN IMAGE",
-        command=train1,
-        width=42,  # Adjust the width as needed
-        height=2,  # Adjust the height as needed
-        bg='#3498db',
-        fg='#ffffff',
-        bd=2,
-        relief=tk.FLAT,
-        activebackground="Green",
-        activeforeground="White",
-    )
-    train_button.pack(pady=8)
-
     def back_to_main_screen():
         registration_window.destroy()  # Close the registration window
         root.deiconify()  # Show the main window again
@@ -189,9 +176,77 @@ def open_registration_screen():
     )
     back_button.pack(pady=8)
 
+def check_student_information():
+    root.withdraw()  # Hide the main window
+
+    check_window = tk.Toplevel(root)
+    check_window.title("Check Student Information")
+
+    main_window_width = 382
+    main_window_height = 300
+    check_window.geometry(f"{main_window_width}x{main_window_height}")
+
+    # Create an entry widget for student ID
+    student_id_label = tk.Label(check_window, text="Enter Student ID:")
+    student_id_label.pack()
+    student_id_entry = tk.Entry(check_window)
+    student_id_entry.pack()
+
+    result_label = tk.Label(check_window, text="", fg="green")
+    result_label.pack()
+
+    def get_student_info():
+        entered_student_id = student_id_entry.get()
+
+        # Read the CSV file to search for student information
+        with open('student_database.csv', 'r') as file:
+            csv_reader = csv.reader(file)
+            for row in csv_reader:
+                if row[1] == entered_student_id:  # Assuming student ID is in the second column
+                    student_info = f"Student ID: {row[1]}\nName: {row[0]}\nProgramme: {row[2]}\nTutorial Group: {row[3]}\nYear and Semester: {row[4]}"
+                    result_label.config(text=student_info)
+                    return
+
+        result_label.config(text="Student not found")
+
+    # Create a button to fetch student information
+    fetch_info_button = tk.Button(
+        check_window,
+        text="Check",
+        command=get_student_info,
+        width=32,
+        height=2,
+        bg='#3498db',
+        fg='#ffffff',
+        bd=2,
+        relief=tk.FLAT,
+        activebackground="Green",
+        activeforeground="White",
+    )
+    fetch_info_button.pack(pady=8)
+    def back_to_main_screen():
+        check_window.destroy()  # Close the check window
+        root.deiconify()  # Show the main window again
+
+    # Back button to go back to the main screen
+    back_button = tk.Button(
+        check_window,
+        text="Back",
+        command=back_to_main_screen,
+        width=32,
+        height=2,
+        bg='red',
+        fg='#ffffff',
+        bd=2,
+        relief=tk.FLAT,
+        activebackground="Green",
+        activeforeground="White",
+    )
+    back_button.pack(pady=8)
+
+
 # ---------------main driver ------------------
 # create a tkinter window
-
 
 content_frame = tk.Frame(root)
 content_frame.grid(row=1, column=0, padx=15, pady=8)
@@ -200,6 +255,28 @@ content_frame.grid(row=1, column=0, padx=15, pady=8)
 # root.geometry('100x100')
 
 # Create a Button
+check_info_button = tk.Button(
+    root,
+    text="CHECK STUDENT INFORMATION",
+    command=check_student_information,
+    width=42,
+    bg='#3498db',
+    fg='#ffffff',
+    bd=2,
+    relief=tk.FLAT,
+    activebackground="Green",
+    activeforeground="White",
+)
+check_info_button.grid(
+    padx=15,
+    pady=8,
+    ipadx=24,
+    ipady=6,
+    row=6,  # Adjust the row as needed
+    column=0,
+    columnspan=4,
+    sticky=tk.W + tk.E + tk.N + tk.S,
+)
 
 registration_button = tk.Button(
     root,
@@ -254,7 +331,7 @@ btn5 = tk.Button(
     text='EXIT',
     command=root.destroy,
     width=42,
-    bg='#3498db',
+    bg='red',
     fg='#ffffff',
     bd=2,
     relief=tk.FLAT,

@@ -3,11 +3,6 @@ import cv2
 
 def takeImages(programme, year_and_sem, tutorial_group, name_of_student, student_id_person):
     source = "0"  # RTSP link or webcam-id
-    # name_of_student = input("Enter your name: ")  # Prompt the user for their name
-    # student_id_person = input("Enter your Student ID: ")  # Prompt the user for their student id
-    # programme = input("Enter your Programme: ")
-    # tutorial_group = input("Enter your Tutorial Group: ")
-    # year_and_sem = input("Enter you Year and Semester (eg:Y1S3): ")
     path_to_save = "Data"  # Replace with the path to save dir
     min_confidence = 0.8
     number_of_images = 100
